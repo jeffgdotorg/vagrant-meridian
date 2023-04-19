@@ -1,0 +1,5 @@
+sudo systemctl start opennms
+sudo systemctl stop opennms
+sudo systemctl restart opennms
+sudo /opt/opennms/bin/opennms -v status
+ssh -p 8101 admin@localhost
