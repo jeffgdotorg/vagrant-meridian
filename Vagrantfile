@@ -22,15 +22,12 @@ Vagrant.configure("2") do |config|
     curl -1sLf "https://packages.opennms.com/${AUTH_TOKEN}/meridian-2023/config.rpm.txt?distro=el&codename=9" > /tmp/opennms-meridian-2023.repo
     yum-config-manager --add-repo "/tmp/opennms-meridian-2023.repo"
     yum -q makecache -y --disablerepo='*' --enablerepo='opennms-meridian-2023'
-    yum install -y https://dl.grafana.com/oss/release/grafana-9.4.7-1.x86_64.rpm
     dnf -y install vim-enhanced nmap-ncat net-snmp net-snmp-utils rrdtool
     sed -i -e '/^view.*systemview.*included.*\.1\.3\.6\.1\.2\.1\.1/s/\.1\.3\.6\.1\.2\.1\.1$/.1/' /etc/snmp/snmpd.conf
     systemctl enable --now snmpd
-    dnf -y install epel-release
     dnf -y install haveged
     dnf -y install java-11-openjdk-devel
     dnf -y install postgresql-server postgresql
-    systemctl enable --now haveged
     postgresql-setup initdb
     sed -i -e '/^host.*all.*all.*ident$/s/ident/trust/' /var/lib/pgsql/data/pg_hba.conf
     systemctl enable --now postgresql
@@ -40,8 +37,10 @@ Vagrant.configure("2") do |config|
     /opt/opennms/bin/runjava -s
     /opt/opennms/bin/install -dis
     /sbin/install_iplike-13.sh
+    systemctl enable --now haveged
     systemctl enable --now opennms
     systemctl enable --now grafana-server
+    sed -i -e '/^Defaults.*secure_path = /s,$,:/opt/opennms/bin,' /etc/sudoers
     /usr/bin/install -o vagrant -g vagrant -m 0600 /vagrant/dot_bash_history /home/vagrant/.bash_history
   SHELL
 end
